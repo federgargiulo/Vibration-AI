@@ -78,7 +78,7 @@ float32_t fft_out_buf_realZ[FFT_SIZE];
 arm_rfft_fast_instance_f32 fft_handler;
 arm_cfft_radix4_instance_f32 fft_handler_cplx;
 float32_t massimo;
-float32_t valMassimiX[10][1];
+float32_t valMassimiX[10];
 float32_t indX[10];
 float32_t valMassimiY[10];
 float32_t indY[10];
@@ -103,6 +103,8 @@ float Vettx[DIM];
 float Vetty[DIM];
 float Vettz[DIM];
 volatile uint8_t flag_elapsed = 0;
+ai_buffer *ai_input;
+ai_buffer *ai_output;
 
 void uprintf(char* str){
 	HAL_UART_Transmit(&huart5, (uint8_t*)str, strlen(str), 100);
@@ -341,16 +343,16 @@ int main(void)
          	 tempX[j] = (float32_t)fft_out_buf_realX[j];
           }
 
-          for(int j = 0; j<10;j++){
+          for(int j = 0; j<5;j++){
 
          	 arm_max_f32(tempX, FFT_SIZE, &massimo, &indmax);
-         	 valMassimiX[j][1] = massimo;
+         	 valMassimiX[j] = massimo;
          	 indX[j] = indmax*passo_f;
          	 tempX[indmax] = 0;
-         	 sprintf(buffer3,"%f \n \r",valMassimiX[j][1]);
-         	 //uprintf(buffer3);
+         	 sprintf(buffer3,"%f \n \r",valMassimiX[j]);
+         	 uprintf(buffer3);
          	 sprintf(buffer2,"%f \n \r",indX[j]);
-         	 //uprintf(buffer2);
+         	 uprintf(buffer2);
           }
 
           //Prendo le 10 armoniche a magnitude maggiore di Y
@@ -392,13 +394,10 @@ int main(void)
 
   //Definizione parametri per il NN
 
-  ai_error ai_err;
-  ai_i32 inf;
-
+  AI_ALIGNED(32) ai_u32 activations[AI_NETWORK_DATA_ACTIVATIONS_SIZE];
 
   //Ricavo i pesi e i bias dal modello
 
-  AI_ALIGNED(4) ai_u8 activations[AI_NETWORK_DATA_ACTIVATIONS_SIZE];
   ai_network_params ai_params = {
 		  AI_NETWORK_DATA_WEIGHTS(ai_network_data_weights_get()),
 		  AI_NETWORK_DATA_ACTIVATIONS(activations)
@@ -406,14 +405,8 @@ int main(void)
 
   //Creo i vettori buffer per raccogliere gli input e gli output del mio NN
 
-  AI_ALIGNED(4) ai_i8 input_data[AI_NETWORK_IN_1_SIZE_BYTES];
-  AI_ALIGNED(4) ai_i8 output_data[AI_NETWORK_OUT_1_SIZE_BYTES];
-
-  ai_buffer ai_input[AI_NETWORK_IN_NUM] = AI_NETWORK_IN;
-  ai_buffer ai_output[AI_NETWORK_OUT_NUM] = AI_NETWORK_OUT;
-
-  ai_input[0].data = AI_HANDLE_PTR(input_data);
-  ai_output[0].data = AI_HANDLE_PTR(output_data);
+  AI_ALIGNED(32) ai_i8 input_data[AI_NETWORK_IN_1_SIZE_BYTES];
+  AI_ALIGNED(32) ai_i8 output_data[AI_NETWORK_OUT_1_SIZE_BYTES];
 
   //Puntatore al modello
 
@@ -422,6 +415,7 @@ int main(void)
 
   //Creo un'istanza del NN
 
+  ai_error ai_err;
   ai_err = ai_network_create(&network,AI_NETWORK_DATA_CONFIG);
 
   //Verifico che il NN sia stato istanziato ed inizializzato correttamente
@@ -439,40 +433,33 @@ int main(void)
 	   uprintf(buffer2);
    }
 
-  //Riempio il buffer di input
+   //
 
-  for(uint32_t j = 0;j<AI_NETWORK_IN_1_SIZE;j++){
-	  ((ai_float*)input_data)[j] = (ai_float)40;
-	  //sprintf(buffer3,"%f \n \r",((ai_float*)input_data)[j]);
-	  //uprintf(buffer3);
-  }
+   ai_input = ai_network_inputs_get(network, NULL);
+   ai_output = ai_network_outputs_get(network, NULL);
 
+   ai_input->data = AI_HANDLE_PTR(input_data);
+   ai_output->data = AI_HANDLE_PTR(output_data);
 
-  //Eseguo l'inferenza
+   //Riempio il buffer di input
 
-  inf = ai_network_run(network, &ai_input[0], &ai_output[0]);
+   for(int j=0;j<AI_NETWORK_IN_1_SIZE;j++){
 
-  if(inf != 1){
+	  ((ai_float*)input_data)[j] = (ai_float)5;
+	  sprintf(buffer2,"%f \n \r",((ai_float*)input_data)[j]);
+	  uprintf(buffer2);
+   }
 
-	  	  //sprintf(buffer2,"Errore nell'eseguire l'inferenza");
-	  	  //uprintf(buffer2);
-  }
+   ai_i32 inference = ai_network_run(network,ai_input,ai_output);
 
+   if(inference != 1){
 
+   	  	  sprintf(buffer2,"Errore nell'eseguire l'inferenza");
+   	  	  uprintf(buffer2);
+   }
 
-  //Vedo il responso della prediction
-
-  float y_val;
-  y_val = ((float*)output_data)[0];
-  sprintf(buffer2,"%f \n \r",y_val);
-  uprintf(buffer2);
-
-
-
-
-
-
-
+   sprintf(buffer2,"%f \n \r",((ai_float*)output_data)[0]);
+   uprintf(buffer2);
 
 
 
