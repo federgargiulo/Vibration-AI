@@ -1,0 +1,109 @@
+Neural Network Tools for STM32AI v1.4.1 (STM.ai v6.0.0-RC6)
+Created date       : 2023-02-21 18:55:01
+Parameters         : generate --name network -m C:/Users/giaco/Downloads/modello_asc (1).tflite --type tflite --compression 1 --verbosity 1 --workspace C:\Users\giaco\AppData\Local\Temp\mxAI_workspace283854914713004453451961012210824 --output C:\Users\giaco\.stm32cubemx
+
+Exec/report summary (generate)
+------------------------------------------------------------------------------------------------------------------------
+model file         : C:\Users\giaco\Downloads\modello_asc (1).tflite
+type               : tflite
+c_name             : network
+compression        : None
+quantize           : None
+workspace dir      : C:\Users\giaco\AppData\Local\Temp\mxAI_workspace283854914713004453451961012210824
+output dir         : C:\Users\giaco\.stm32cubemx
+
+model_name         : modello_asc_1
+model_hash         : 788b8b3bd2b933f758e335bb4c911137
+input              : dense_input [2 items, 8 B, ai_float, FLOAT32, (1, 1, 2)]
+inputs (total)     : 8 B
+output             : nl_2 [1 items, 4 B, ai_float, FLOAT32, (1, 1, 1)]
+outputs (total)    : 4 B
+params #           : 41 items (164 B)
+macc               : 61
+weights (ro)       : 164 B (164 B) 
+activations (rw)   : 44 B (44 B) 
+ram (total)        : 56 B (56 B) = 44 + 8 + 4
+
+Model name - modello_asc_1 ['dense_input'] ['nl_2']
+-----------------------------------------------------------------------------------------------------------
+id   layer (type)             shape    param/size   macc   connected to   |   c_size   c_macc   c_type    
+-----------------------------------------------------------------------------------------------------------
+0    dense_input (Input)      (c:2)                                       |                    
+     dense_0 (Dense)          (c:10)   30/120       30     dense_input    |                     dense()[0]
+     nl_0_nl (Nonlinearity)   (c:10)                10     dense_0        |                     nl()[1]   
+-----------------------------------------------------------------------------------------------------------
+1    dense_1 (Dense)          (c:1)    11/44        11     nl_0_nl        |                     dense()[2]
+-----------------------------------------------------------------------------------------------------------
+2    nl_2 (Nonlinearity)      (c:1)                 10     dense_1        |                     nl()/o[3] 
+-----------------------------------------------------------------------------------------------------------
+model/c-model: macc=61/61  weights=164/164  activations=--/44 io=--/12
+
+
+Generated C-graph summary
+------------------------------------------------------------------------------------------------------------------------
+model name         : modello_asc_1
+c-name             : network
+c-node #           : 4
+c-array #          : 9
+activations size   : 44
+weights size       : 164
+macc               : 61
+inputs             : ['dense_input_output_array']
+outputs            : ['nl_2_output_array']
+
+
+C-Arrays (9)
+------------------------------------------------------------------------------------------------------------------------
+c_id  name (*_array)      item/size           mem-pool     c-type       fmt    comment            
+------------------------------------------------------------------------------------------------------------------------
+0     dense_input_output  2/8                 user         float        float  /input             
+1     dense_0_output      10/40               activations  float        float                     
+2     nl_0_nl_output      10/40               activations  float        float                     
+3     dense_1_output      1/4                 activations  float        float                     
+4     nl_2_output         1/4                 user         float        float  /output            
+5     dense_0_weights     20/80               weights      const float  float                     
+6     dense_0_bias        10/40               weights      const float  float                     
+7     dense_1_weights     10/40               weights      const float  float                     
+8     dense_1_bias        1/4                 weights      const float  float                     
+------------------------------------------------------------------------------------------------------------------------
+
+
+C-Layers (4)
+------------------------------------------------------------------------------------------------------------------------
+c_id  name (*_layer)  id  layer_ macc        rom         tensors                shape (array id)                       
+------------------------------------------------------------------------------------------------------------------------
+0     dense_0         0   dense  30          120         I: dense_input_output  [1, 1, 1, 2] (0)                       
+                                                         W: dense_0_weights                                            
+                                                         W: dense_0_bias                                               
+                                                         O: dense_0_output      [1, 1, 1, 10] (1)                      
+------------------------------------------------------------------------------------------------------------------------
+1     nl_0_nl         0   nl     10          0           I: dense_0_output      [1, 1, 1, 10] (1)                      
+                                                         O: nl_0_nl_output      [1, 1, 1, 10] (2)                      
+------------------------------------------------------------------------------------------------------------------------
+2     dense_1         1   dense  11          44          I: nl_0_nl_output      [1, 1, 1, 10] (2)                      
+                                                         W: dense_1_weights                                            
+                                                         W: dense_1_bias                                               
+                                                         O: dense_1_output      [1, 1, 1, 1] (3)                       
+------------------------------------------------------------------------------------------------------------------------
+3     nl_2            2   nl     10          0           I: dense_1_output      [1, 1, 1, 1] (3)                       
+                                                         O: nl_2_output         [1, 1, 1, 1] (4)                       
+------------------------------------------------------------------------------------------------------------------------
+
+
+
+Complexity report per layer - macc=61 weights=164 act=44 ram_io=12
+------------------------------------------------------------------------
+id   name      c_macc                    c_rom                     c_id
+------------------------------------------------------------------------
+0    dense_0   ||||||||||||||||  49.2%   ||||||||||||||||  73.2%   [0] 
+0    nl_0_nl   ||||||            16.4%   |                  0.0%   [1] 
+1    dense_1   ||||||            18.0%   ||||||            26.8%   [2] 
+2    nl_2      ||||||            16.4%   |                  0.0%   [3] 
+
+Generated files (5)
+------------------------------------------------------------------------------------------------------------------------
+C:\Users\giaco\.stm32cubemx\network_config.h
+C:\Users\giaco\.stm32cubemx\network.h
+C:\Users\giaco\.stm32cubemx\network.c
+C:\Users\giaco\.stm32cubemx\network_data.h
+C:\Users\giaco\.stm32cubemx\network_data.c
