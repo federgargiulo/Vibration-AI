@@ -278,10 +278,10 @@ int main(void)
      //FFT reale
 
 
-     	 	  arm_cfft_radix4_instance_f32 S;
+     	 	  arm_cfft_radix2_instance_f32 S;
 
      	 	  /* Inizializzo il modulo CFFT/CIFFT, intFlag = 0, doBitReverse = 1 */
-     	 	  arm_cfft_radix4_init_f32(&S, FFT_SIZE, 0, 1);
+     	 	  arm_cfft_radix2_init_f32(&S, FFT_SIZE, 0, 1);
 
      	 	  //Asse X
 
@@ -292,7 +292,7 @@ int main(void)
      	 	  }
 
      	       /* Processo i dati attraverso il modulo CFFT/CIFFT */
-     	        arm_cfft_radix4_f32(&S, fft_in_buf_realX);
+     	        arm_cfft_radix2_f32(&S, fft_in_buf_realX);
 
      	       /* Processo i dati attraverso il modulo Complex Magnitude */
      	        arm_cmplx_mag_f32(fft_in_buf_realX, fft_out_buf_realX, FFT_SIZE);
@@ -309,7 +309,7 @@ int main(void)
        	 	  }
 
        	       /* Processo i dati attraverso il modulo CFFT/CIFFT */
-       	        arm_cfft_radix4_f32(&S, fft_in_buf_realY);
+       	        arm_cfft_radix2_f32(&S, fft_in_buf_realY);
 
        	       /* Processo i dati attraverso il modulo Complex Magnitude */
        	        arm_cmplx_mag_f32(fft_in_buf_realY, fft_out_buf_realY, FFT_SIZE);
@@ -324,13 +324,16 @@ int main(void)
        	           }
 
        	      /* Processo i dati attraverso il modulo CFFT/CIFFT */
-       	      arm_cfft_radix4_f32(&S, fft_in_buf_realZ);
+       	      arm_cfft_radix2_f32(&S, fft_in_buf_realZ);
 
        	      /* Processo i dati attraverso il modulo Complex Magnitude */
        	      arm_cmplx_mag_f32(fft_in_buf_realZ, fft_out_buf_realZ, FFT_SIZE);
 
 
        	  //Prendo le N armoniche a magnitude maggiore di X
+
+
+
 
           for(int j = 0; j<((FFT_SIZE/2)-1);j++){
          	 tempX[j] = (float32_t)fft_out_buf_realX[j+1];
