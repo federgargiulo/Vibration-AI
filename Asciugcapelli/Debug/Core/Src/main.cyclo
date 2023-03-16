@@ -1,0 +1,6 @@
+main.c:69:6:uprintf	1
+main.c:74:6:printAmpFreq	10
+main.c:114:6:printAcc	6
+main.c:188:5:main	24
+main.c:525:6:SystemClock_Config	4
+main.c:581:6:Error_Handler	1
